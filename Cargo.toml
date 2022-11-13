@@ -1,0 +1,16 @@
+[package]
+name = "pong"
+version = "0.1.0"
+edition = "2021"
+authors = ["Flippette <quangdatle2006@outlook.com>"]
+license = "MIT"
+
+[dependencies]
+color-eyre = "0.6.2"
+macroquad = "0.3.25"
+
+[profile.release]
+opt-level = 3
+lto = true
+strip = true
+codegen-units = 1
