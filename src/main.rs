@@ -134,10 +134,11 @@ fn rand_unit_vec() -> Vec2 {
 }
 
 fn collide(a: Vec2, a_texture: &Texture2D, b: Vec2, b_texture: &Texture2D) -> CollideType {
-    let a = a + sprite_center_offset(a_texture);
-    let b = b + sprite_center_offset(b_texture);
+    // let a = a + sprite_center_offset(a_texture);
+    // let b = b + sprite_center_offset(b_texture);
 
-    let diff_vec = (b - a).abs();
+    let diff_vec =
+        ((b + sprite_center_offset(b_texture)) - (a + sprite_center_offset(a_texture))).abs();
 
     // since we're comparing 2 uniform axis rectangles, simple x and y distance checks are okay
     if diff_vec.x < a_texture.width() / 2.0 + b_texture.width() / 2.0 {
