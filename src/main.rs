@@ -23,6 +23,7 @@ async fn main() -> Result<()> {
     set_pc_assets_folder("assets");
 
     let mut ball = Ball::create_from_file(BALL_SPRITE_PATH).await?;
+
     let mut player1 = Player::create_from_file(
         PADDLE_SPRITE_PATH,
         0,
@@ -44,14 +45,14 @@ async fn main() -> Result<()> {
         clear_background(BLACK);
 
         player1.process_input();
-        player1.tick();
+        player1.tick(); // movement
 
         player2.process_input();
-        player2.tick();
+        player2.tick(); // movement
 
         ball.check_player_collision(&[&player1, &player2]);
         ball.check_out_of_bounds(&mut player1.score, &mut player2.score);
-        ball.tick();
+        ball.tick(); // movement
 
         draw_texture(
             ball.sprite,
@@ -100,7 +101,6 @@ fn window_conf() -> Conf {
         window_width: 800,
         window_height: 400,
         window_resizable: false,
-        sample_count: 4,
         ..Default::default()
     }
 }
@@ -109,11 +109,10 @@ fn screen_center() -> Vec2 {
     Vec2::new(screen_width() / 2.0, screen_height() / 2.0)
 }
 
+// coordinates start from top left to bottom right;
+// this is to convert object coordinates to sprite center coorinates
 fn sprite_center_offset(texture: &Texture2D) -> Vec2 {
-    Vec2::new(
-        -texture.width() as f32 / 2.0,
-        -texture.height() as f32 / 2.0,
-    )
+    Vec2::new(texture.width() / 2.0, texture.height() / 2.0)
 }
 
 fn is_out_of_bounds(position: Vec2, texture: &Texture2D) -> OutOfBoundsType {
@@ -131,15 +130,25 @@ fn is_out_of_bounds(position: Vec2, texture: &Texture2D) -> OutOfBoundsType {
 }
 
 fn rand_unit_vec() -> Vec2 {
-    Vec2::new(
-        rand::rand() as f32 / i32::MAX as f32 - 0.5,
-        rand::rand() as f32 / i32::MAX as f32 - 0.5,
-    )
-    .normalize()
+    Vec2::new(rand::gen_range(-1.0, 1.0), rand::gen_range(-1.0, 1.0)).normalize()
 }
 
 fn collide(a: Vec2, a_texture: &Texture2D, b: Vec2, b_texture: &Texture2D) -> CollideType {
-    todo!("implement 2d box collision code");
+    let a = a + sprite_center_offset(a_texture);
+    let b = b + sprite_center_offset(b_texture);
+
+    let diff_vec = (b - a).abs();
+
+    // since we're comparing 2 uniform axis rectangles, simple x and y distance checks are okay
+    if diff_vec.x < a_texture.width() / 2.0 + b_texture.width() / 2.0 {
+        if a.y + a_texture.height() == b.y || b.y + b_texture.height() == a.y {
+            return CollideType::Vertical;
+        } else if diff_vec.y < a_texture.height() / 2.0 + b_texture.height() / 2.0 {
+            return CollideType::Horizontal;
+        }
+    }
+
+    CollideType::Separate
 }
 
 enum OutOfBoundsType {

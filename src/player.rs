@@ -52,6 +52,7 @@ impl Player {
             _ => Vec2::ZERO,
         };
 
+        // prevent player from moving off screen
         match is_out_of_bounds(self.paddle.transform.position, &self.paddle.sprite) {
             OutOfBoundsType::Top => {
                 self.paddle.transform.position.y = 0.1;
